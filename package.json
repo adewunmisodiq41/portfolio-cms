@@ -10,9 +10,12 @@
     "typecheck": "tsc --noEmit",
     "db:push": "prisma db push",
     "db:seed": "tsx --env-file=.env prisma/seed.ts",
-    "setup": "prisma db push && tsx --env-file=.env prisma/seed.ts"
+    "setup": "prisma db push && tsx --env-file=.env prisma/seed.ts",
+    "db:restyle": "tsx --env-file=.env prisma/restyle.ts",
+    "db:style": "tsx --env-file=.env prisma/restyle.ts"
   },
   "dependencies": {
+    "@fontsource-variable/inter": "^5.2.5",
     "@prisma/adapter-pg": "6.19.0",
     "@prisma/client": "6.19.0",
     "@vercel/blob": "^2.8.2",
@@ -21,7 +24,8 @@
     "next-auth": "^4.24.15",
     "pg": "^8.13.0",
     "react": "19.1.1",
-    "react-dom": "19.1.1"
+    "react-dom": "19.1.1",
+    "react-icons": "^5.7.0"
   },
   "devDependencies": {
     "@types/bcryptjs": "^2.4.6",

@@ -27,7 +27,7 @@ export default async function CategoryPage({ params }: Props) {
       <Link href="/" className="back-btn">
         ← Back
       </Link>
-      <h1>{category.name}</h1>
+      <h2>{category.name}</h2>
       {category.intro && <p className="intro">{category.intro}</p>}
       <ProjectGrid projects={category.projects} c1={category.color1} c2={category.color2} />
     </div>

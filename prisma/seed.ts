@@ -2,14 +2,14 @@ import bcrypt from "bcryptjs";
 import { prisma } from "../lib/prisma";
 
 const CATEGORIES = [
-  { name: "Branding", slug: "branding", color1: "#ff8a5b", color2: "#e5663a", intro: "Identities, logos and brand systems built to be remembered." },
-  { name: "UI/UX Design", slug: "ui-ux-design", color1: "#6c8cff", color2: "#4a68de", intro: "Interfaces designed around real user needs." },
-  { name: "Product Design", slug: "product-design", color1: "#9b7bff", color2: "#7a58e6", intro: "End-to-end product thinking, from concept to launch." },
-  { name: "Development", slug: "development", color1: "#27c28a", color2: "#16a070", intro: "Clean, fast builds that match the design." },
-  { name: "Graphic Design", slug: "graphic-design", color1: "#ffc94a", color2: "#e8a915", intro: "Posters, flyers, banners and print-ready work." },
-  { name: "Social Media Design", slug: "social-media-design", color1: "#ff6fa5", color2: "#e04a85", intro: "Scroll-stopping visuals for every platform." },
-  { name: "Digital Marketing", slug: "digital-marketing", color1: "#35c4e0", color2: "#1ba3c0", intro: "Campaign creative that supports growth." },
-  { name: "Motion Design", slug: "motion-design", color1: "#ff5d5d", color2: "#d93f3f", intro: "Animated brand stories and motion graphics." },
+  { name: "Branding", slug: "branding", color1: "#86cff8", color2: "#5aa9e6", intro: "Identities, logos and brand systems built to be remembered." },
+  { name: "UI/UX Design", slug: "ui-ux-design", color1: "#7fd6a2", color2: "#47b075", intro: "Interfaces designed around real user needs." },
+  { name: "Product Design", slug: "product-design", color1: "#f7d768", color2: "#d9b236", intro: "End-to-end product thinking, from concept to launch." },
+  { name: "Development", slug: "development", color1: "#f1ae5c", color2: "#df8a2e", intro: "Clean, fast builds that match the design." },
+  { name: "Graphic Design", slug: "graphic-design", color1: "#ea7b72", color2: "#cc4f47", intro: "Posters, flyers, banners and print-ready work." },
+  { name: "Social Media Design", slug: "social-media-design", color1: "#b062cf", color2: "#8a3fae", intro: "Scroll-stopping visuals for every platform." },
+  { name: "Digital Marketing", slug: "digital-marketing", color1: "#a98676", color2: "#85604f", intro: "Campaign creative that supports growth." },
+  { name: "Motion Design", slug: "motion-design", color1: "#444444", color2: "#1f1f1f", intro: "Animated brand stories and motion graphics." },
 ];
 
 async function main() {
@@ -43,9 +43,11 @@ async function main() {
       location: "Your City",
       bio: "I help businesses turn complex ideas into design that solves real problems. Every project is built to sharpen your brand, make things easier to use, and connect you with the people who matter most. From first sketch to final launch, I stay close to every detail.",
       bookingUrl: `mailto:${email}`,
-      ratingScore: "",
-      ratingText: "",
-      showRating: false,
+      ratingScore: "4.9/5",
+      ratingText: "Trusted by 100+ Global Brand & Founders",
+      showRating: true,
+      bgColor: "#ffffff",
+      accentColor: "#0a0a0a",
       footerText: "All rights reserved.",
     },
   });
@@ -56,9 +58,9 @@ async function main() {
 
   await prisma.stat.createMany({
     data: [
-      { value: "00", label: "Years of experience", order: 0 },
-      { value: "00+", label: "Projects completed", order: 1 },
-      { value: "00%", label: "Satisfied clients", order: 2 },
+      { value: "12", label: "Years of experience", order: 0 },
+      { value: "60+", label: "Projects completed", order: 1 },
+      { value: "98%", label: "Satisfied clients", order: 2 },
     ],
   });
   await prisma.socialLink.createMany({

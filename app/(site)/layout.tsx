@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import type { CSSProperties } from "react";
 import { getSiteData } from "@/lib/data";
+import SocialIcon, { detectKind } from "@/components/SocialIcon";
 
 export const dynamic = "force-dynamic";
 
@@ -23,43 +24,51 @@ function Portrait({ url, name }: { url: string; name: string }) {
     return <img src={url} alt={`Portrait of ${name}`} />;
   }
   return (
-    <svg viewBox="0 0 344 380" preserveAspectRatio="xMidYMid slice" role="img" aria-label="Portrait placeholder">
-      <rect width="344" height="380" fill="#d9d6cf" />
-      <circle cx="172" cy="150" r="58" fill="#bdb9b0" />
-      <path d="M40 380c8-80 60-120 132-120s124 40 132 120z" fill="#bdb9b0" />
+    <svg viewBox="0 0 243 335" preserveAspectRatio="xMidYMid slice" role="img" aria-label="Portrait placeholder">
+      <rect width="243" height="335" fill="#dcd9d2" />
+      <circle cx="121" cy="136" r="50" fill="#bdb9b0" />
+      <path d="M20 335c6-76 48-112 101-112s95 36 101 112z" fill="#bdb9b0" />
     </svg>
   );
 }
 
+const isExternal = (url: string) => /^https?:/i.test(url);
+
 export default async function SiteLayout({ children }: { children: React.ReactNode }) {
   const { settings: s, stats, socials } = await getSiteData();
-  const external = (url: string) => /^https?:/i.test(url);
+  const hasRating = s.showRating && (s.ratingScore || s.ratingText);
 
   return (
     <div className="site" style={{ "--bg": s.bgColor, "--accent": s.accentColor } as CSSProperties}>
-      <div className="shell">
-        <aside className="profile" aria-label="Profile">
-          <div className="portrait">
-            <Portrait url={s.portraitUrl} name={s.name} />
+      <aside className="profile" aria-label="Profile">
+        <div className="p-in">
+          <div className="p-top">
+            <div className="portrait">
+              <Portrait url={s.portraitUrl} name={s.name} />
+            </div>
+            <h1 className="name">
+              {s.greeting && <span>{s.greeting}</span>}
+              <span>{s.name}</span>
+              {s.location && (
+                <span>
+                  {s.locationPrefix} {s.location}
+                </span>
+              )}
+            </h1>
           </div>
-          <div>
-            {s.greeting && <p className="hello">{s.greeting}</p>}
-            <h1 className="name">{s.name}</h1>
-            {s.location && (
-              <p className="loc">
-                {s.locationPrefix} {s.location}
-              </p>
-            )}
-          </div>
-          {s.showRating && (s.ratingScore || s.ratingText) && (
+
+          {hasRating && (
             <div className="rating">
-              <span className="stars" aria-hidden="true">
-                ★★★★★
-              </span>
-              {s.ratingScore && <b>{s.ratingScore}</b>}
-              {s.ratingText && <span>{s.ratingText}</span>}
+              <div className="rating-row">
+                <span className="stars" aria-hidden="true">
+                  ★★★★★
+                </span>
+                {s.ratingScore && <span>{s.ratingScore}</span>}
+              </div>
+              {s.ratingText && <p className="rating-text">{s.ratingText}</p>}
             </div>
           )}
+
           {socials.length > 0 && (
             <nav className="socials" aria-label="Social links">
               {socials.map((l) => (
@@ -67,62 +76,47 @@ export default async function SiteLayout({ children }: { children: React.ReactNo
                   key={l.url + l.name}
                   href={l.url}
                   aria-label={l.name}
-                  {...(external(l.url) ? { target: "_blank", rel: "noopener noreferrer" } : {})}
+                  {...(isExternal(l.url) ? { target: "_blank", rel: "noopener noreferrer" } : {})}
                 >
-                  {l.label}
+                  <SocialIcon kind={detectKind(l.name, l.url)} label={l.label} />
                 </a>
               ))}
             </nav>
           )}
-          {s.bookingUrl && (
-            <a
-              className="btn block"
-              href={s.bookingUrl}
-              {...(external(s.bookingUrl) ? { target: "_blank", rel: "noopener noreferrer" } : {})}
-            >
-              {s.bookingLabel}
-            </a>
-          )}
-        </aside>
+        </div>
+      </aside>
 
-        <main>
+      <main>
+        {(stats.length > 0 || s.bookingUrl) && (
           <header className="top">
-            <div className="avail">
-              <i className="dot" />
-              <span>{s.availability}</span>
+            <div className="stats">
+              {stats.map((st, i) => (
+                <div className="stat" key={i}>
+                  <b>{st.value}</b>
+                  <span>{st.label}</span>
+                </div>
+              ))}
             </div>
             {s.bookingUrl && (
               <a
                 className="btn"
                 href={s.bookingUrl}
-                {...(external(s.bookingUrl) ? { target: "_blank", rel: "noopener noreferrer" } : {})}
+                {...(isExternal(s.bookingUrl) ? { target: "_blank", rel: "noopener noreferrer" } : {})}
               >
                 {s.bookingLabel}
+                <span aria-hidden="true">→</span>
               </a>
             )}
           </header>
+        )}
 
-          {stats.length > 0 && (
-            <section className="stats" aria-label="Highlights">
-              {stats.map((st, i) => (
-                <div className="stat" key={i}>
-                  <h3>{st.value}</h3>
-                  <p>{st.label}</p>
-                </div>
-              ))}
-            </section>
-          )}
+        {children}
 
-          {s.bio && <section className="about">{s.bio}</section>}
-
-          <section className="workspace">{children}</section>
-
-          <footer className="foot">
-            © {new Date().getFullYear()} {s.name}
-            {s.footerText ? ` · ${s.footerText}` : ""}
-          </footer>
-        </main>
-      </div>
+        <footer className="foot">
+          © {new Date().getFullYear()} {s.name}
+          {s.footerText ? ` · ${s.footerText}` : ""}
+        </footer>
+      </main>
     </div>
   );
 }

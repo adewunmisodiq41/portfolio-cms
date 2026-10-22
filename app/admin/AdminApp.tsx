@@ -115,21 +115,20 @@ const SECTIONS: { title: string; fields: FieldDef[] }[] = [
     fields: [
       { key: "name", label: "Your name" },
       { key: "title", label: "Professional title", help: "(used in the browser tab / search title)" },
-      { key: "greeting", label: "Greeting line", help: "(small text above your name)" },
-      { key: "locationPrefix", label: "Text before location", help: '(e.g. "from")' },
+      { key: "greeting", label: "First line of the heading", help: "(e.g. Hey, I’m)" },
+      { key: "locationPrefix", label: "Word before location", help: '(e.g. "from")' },
       { key: "location", label: "Location" },
       { key: "portraitUrl", label: "Profile photo", kind: "image", wide: true },
       { key: "showRating", label: "Show the rating line", kind: "bool" },
-      { key: "ratingScore", label: "Rating score", help: "(e.g. 4.9/5, only if it is real)" },
-      { key: "ratingText", label: "Rating text", wide: true },
+      { key: "ratingScore", label: "Rating score", help: "(shown next to the stars, e.g. 4.9/5. Only use a real one)" },
+      { key: "ratingText", label: "Line under the rating", wide: true },
     ],
   },
   {
-    title: "Booking button & availability",
+    title: "Booking button",
     fields: [
       { key: "bookingLabel", label: "Button text" },
       { key: "bookingUrl", label: "Button link", kind: "url", help: "(calendar link, WhatsApp link, or mailto:you@email.com)" },
-      { key: "availability", label: "Availability text", wide: true },
     ],
   },
   {
@@ -404,14 +403,14 @@ function CategoryCard({
           <input type="text" value={d.intro} onChange={(e) => setD({ ...d, intro: e.target.value })} />
         </label>
         <label className="ad-field">
-          <span>Folder front color</span>
+          <span>Folder main color</span>
           <div className="ad-color">
             <input type="color" value={d.color1} onChange={(e) => setD({ ...d, color1: e.target.value })} />
             <input type="text" value={d.color1} onChange={(e) => setD({ ...d, color1: e.target.value })} />
           </div>
         </label>
         <label className="ad-field">
-          <span>Folder back color</span>
+          <span>Folder back color (darker shade)</span>
           <div className="ad-color">
             <input type="color" value={d.color2} onChange={(e) => setD({ ...d, color2: e.target.value })} />
             <input type="text" value={d.color2} onChange={(e) => setD({ ...d, color2: e.target.value })} />
@@ -482,7 +481,7 @@ function CategoriesTab({
     <div className="ad-stack">
       <div>
         <h2 className="ad-h">Folders</h2>
-        <p className="ad-sub">Each folder on the homepage opens its own gallery. Rename them, recolor them, reorder them, hide or delete them.</p>
+        <p className="ad-sub">Each folder on the homepage opens its own gallery. Rename them, recolor them (the images on a folder come from its first 3 projects with an image), reorder them, hide or delete them.</p>
       </div>
       <div className="ad-card ad-row">
         <input
@@ -812,7 +811,7 @@ export default function AdminApp({ initial, email }: { initial: Initial; email: 
         {tab === "Stats" && (
           <ListTab
             title="Stats"
-            help="The numbers shown in the row under the top bar. Use real numbers only."
+            help="The numbers shown along the top of the page. Use real numbers only."
             initial={initial.stats}
             fields={[
               { key: "value", label: "Number", placeholder: "e.g. 60+" },
@@ -826,11 +825,11 @@ export default function AdminApp({ initial, email }: { initial: Initial; email: 
         {tab === "Social links" && (
           <ListTab
             title="Social links"
-            help="Round buttons on the profile card. The short label (1–2 letters) shows inside the button."
+            help="Icons at the bottom of the profile panel. The icon is picked automatically from the link (Facebook, X, Instagram, LinkedIn, YouTube, TikTok, WhatsApp, GitHub, Behance, Fiverr, Upwork, Framer…)."
             initial={initial.socials}
             fields={[
-              { key: "label", label: "Short label", placeholder: "Ig" },
-              { key: "name", label: "Name (for screen readers)", placeholder: "Instagram" },
+              { key: "name", label: "Name", placeholder: "Instagram" },
+              { key: "label", label: "Short label (only used if no icon matches)", placeholder: "Ig" },
               { key: "url", label: "Link", placeholder: "https://instagram.com/yourname" },
             ]}
             endpoint="/api/admin/socials"

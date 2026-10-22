@@ -28,8 +28,8 @@ model SiteSettings {
   footerText     String   @default("")
   seoTitle       String   @default("")
   seoDescription String   @default("")
-  accentColor    String   @default("#141414")
-  bgColor        String   @default("#f2f1ee")
+  accentColor    String   @default("#0a0a0a")
+  bgColor        String   @default("#ffffff")
   updatedAt      DateTime @updatedAt
 }
 
