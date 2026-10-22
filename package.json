@@ -1,0 +1,36 @@
+{
+  "name": "portfolio-cms",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "prisma generate && next build",
+    "start": "next start",
+    "postinstall": "prisma generate",
+    "typecheck": "tsc --noEmit",
+    "db:push": "prisma db push",
+    "db:seed": "tsx --env-file=.env prisma/seed.ts",
+    "setup": "prisma db push && tsx --env-file=.env prisma/seed.ts"
+  },
+  "dependencies": {
+    "@prisma/adapter-pg": "6.19.0",
+    "@prisma/client": "6.19.0",
+    "@vercel/blob": "^2.8.2",
+    "bcryptjs": "^2.4.3",
+    "next": "15.5.28",
+    "next-auth": "^4.24.15",
+    "pg": "^8.13.0",
+    "react": "19.1.1",
+    "react-dom": "19.1.1"
+  },
+  "devDependencies": {
+    "@types/bcryptjs": "^2.4.6",
+    "@types/node": "^22.0.0",
+    "@types/pg": "^8.11.0",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "prisma": "6.19.0",
+    "tsx": "^4.20.0",
+    "typescript": "^5.6.0"
+  }
+}

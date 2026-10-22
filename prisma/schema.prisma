@@ -1,0 +1,84 @@
+generator client {
+  provider   = "prisma-client-js"
+  engineType = "client"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model SiteSettings {
+  id             Int      @id @default(1)
+  name           String   @default("Your Name")
+  title          String   @default("Creative Designer")
+  greeting       String   @default("Hey, I’m")
+  locationPrefix String   @default("from")
+  location       String   @default("Your City")
+  availability   String   @default("Available for new projects")
+  bio            String   @default("")
+  portraitUrl    String   @default("")
+  bookingUrl     String   @default("")
+  bookingLabel   String   @default("Book a call")
+  ratingScore    String   @default("")
+  ratingText     String   @default("")
+  showRating     Boolean  @default(true)
+  workspaceLabel String   @default("Portfolio")
+  footerText     String   @default("")
+  seoTitle       String   @default("")
+  seoDescription String   @default("")
+  accentColor    String   @default("#141414")
+  bgColor        String   @default("#f2f1ee")
+  updatedAt      DateTime @updatedAt
+}
+
+model Stat {
+  id    Int    @id @default(autoincrement())
+  value String
+  label String
+  order Int    @default(0)
+}
+
+model SocialLink {
+  id    Int    @id @default(autoincrement())
+  label String
+  name  String
+  url   String
+  order Int    @default(0)
+}
+
+model Category {
+  id        Int       @id @default(autoincrement())
+  slug      String    @unique
+  name      String
+  intro     String    @default("")
+  color1    String    @default("#ff8a5b")
+  color2    String    @default("#e5663a")
+  order     Int       @default(0)
+  published Boolean   @default(true)
+  projects  Project[]
+}
+
+model Project {
+  id          Int      @id @default(autoincrement())
+  categoryId  Int
+  category    Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  title       String
+  meta        String   @default("")
+  description String   @default("")
+  imageUrl    String   @default("")
+  linkUrl     String   @default("")
+  tall        Boolean  @default(false)
+  order       Int      @default(0)
+  published   Boolean  @default(true)
+  createdAt   DateTime @default(now())
+
+  @@index([categoryId])
+}
+
+model AdminUser {
+  id           Int    @id @default(autoincrement())
+  email        String @unique
+  passwordHash String
+}
