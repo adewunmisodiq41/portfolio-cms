@@ -27,10 +27,15 @@ export async function saveImage(file: File): Promise<string> {
   const ext = EXT[file.type];
   const name = `${Date.now()}-${randomUUID().slice(0, 8)}.${ext}`;
 
+  // Newer Blob stores connect with BLOB_STORE_ID and sign in automatically (no read/write token).
   const token = blobToken();
-  if (token) {
+  if (token || process.env.BLOB_STORE_ID) {
     const { put } = await import("@vercel/blob");
-    const blob = await put(`portfolio/${name}`, file, { access: "public", addRandomSuffix: false, token });
+    const blob = await put(`portfolio/${name}`, file, {
+      access: "public",
+      addRandomSuffix: false,
+      ...(token ? { token } : {}),
+    });
     return blob.url;
   }
 
