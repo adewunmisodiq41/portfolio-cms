@@ -17,6 +17,8 @@ export function toSettings(s: SettingsDTO & Record<string, unknown>): SettingsDT
     ratingScore: s.ratingScore,
     ratingText: s.ratingText,
     showRating: s.showRating,
+    showBooking: s.showBooking,
+    mobilePhotoSide: s.mobilePhotoSide === "left" ? "left" : "right",
     workspaceLabel: s.workspaceLabel,
     footerText: s.footerText,
     seoTitle: s.seoTitle,

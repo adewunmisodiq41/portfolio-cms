@@ -12,6 +12,8 @@ export type SettingsDTO = {
   ratingScore: string;
   ratingText: string;
   showRating: boolean;
+  showBooking: boolean;
+  mobilePhotoSide: string;
   workspaceLabel: string;
   footerText: string;
   seoTitle: string;

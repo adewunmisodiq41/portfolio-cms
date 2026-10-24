@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import type { CSSProperties } from "react";
 import { getSiteData } from "@/lib/data";
 import SocialIcon, { detectKind } from "@/components/SocialIcon";
+import MiniAvatar from "@/components/MiniAvatar";
 
 export const dynamic = "force-dynamic";
 
@@ -37,11 +38,40 @@ const isExternal = (url: string) => /^https?:/i.test(url);
 export default async function SiteLayout({ children }: { children: React.ReactNode }) {
   const { settings: s, stats, socials } = await getSiteData();
   const hasRating = s.showRating && (s.ratingScore || s.ratingText);
+  const showBooking = s.showBooking && Boolean(s.bookingUrl);
+  const bookingLink = (cls: string) => (
+    <a
+      className={cls}
+      href={s.bookingUrl}
+      {...(isExternal(s.bookingUrl) ? { target: "_blank", rel: "noopener noreferrer" } : {})}
+    >
+      {s.bookingLabel}
+      <span aria-hidden="true">→</span>
+    </a>
+  );
+  const socialLinks = (cls: string, label: string) => (
+    <nav className={cls} aria-label={label}>
+      {socials.map((l) => (
+        <a
+          key={l.url + l.name}
+          href={l.url}
+          aria-label={l.name}
+          {...(isExternal(l.url) ? { target: "_blank", rel: "noopener noreferrer" } : {})}
+        >
+          <SocialIcon kind={detectKind(l.name, l.url)} label={l.label} />
+        </a>
+      ))}
+    </nav>
+  );
 
   return (
-    <div className="site" style={{ "--bg": s.bgColor, "--accent": s.accentColor } as CSSProperties}>
+    <div className="site" data-photo-side={s.mobilePhotoSide} style={{ "--bg": s.bgColor, "--accent": s.accentColor } as CSSProperties}>
       <aside className="profile" aria-label="Profile">
         <div className="p-in">
+          <div className="m-top">
+            {showBooking && bookingLink("btn m-book")}
+            <MiniAvatar url={s.portraitUrl} className="m-avatar" />
+          </div>
           <div className="p-top">
             <div className="portrait">
               <Portrait url={s.portraitUrl} name={s.name} />
@@ -69,25 +99,12 @@ export default async function SiteLayout({ children }: { children: React.ReactNo
             </div>
           )}
 
-          {socials.length > 0 && (
-            <nav className="socials" aria-label="Social links">
-              {socials.map((l) => (
-                <a
-                  key={l.url + l.name}
-                  href={l.url}
-                  aria-label={l.name}
-                  {...(isExternal(l.url) ? { target: "_blank", rel: "noopener noreferrer" } : {})}
-                >
-                  <SocialIcon kind={detectKind(l.name, l.url)} label={l.label} />
-                </a>
-              ))}
-            </nav>
-          )}
+          {socials.length > 0 && socialLinks("socials", "Social links")}
         </div>
       </aside>
 
       <main>
-        {(stats.length > 0 || s.bookingUrl) && (
+        {(stats.length > 0 || showBooking) && (
           <header className="top">
             <div className="stats">
               {stats.map((st, i) => (
@@ -97,20 +114,13 @@ export default async function SiteLayout({ children }: { children: React.ReactNo
                 </div>
               ))}
             </div>
-            {s.bookingUrl && (
-              <a
-                className="btn"
-                href={s.bookingUrl}
-                {...(isExternal(s.bookingUrl) ? { target: "_blank", rel: "noopener noreferrer" } : {})}
-              >
-                {s.bookingLabel}
-                <span aria-hidden="true">→</span>
-              </a>
-            )}
+            {showBooking && bookingLink("btn")}
           </header>
         )}
 
         {children}
+
+        {socials.length > 0 && socialLinks("socials-foot", "Social links")}
 
         <footer className="foot">
           © {new Date().getFullYear()} {s.name}

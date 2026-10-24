@@ -207,7 +207,7 @@ function MediaField({
 
 /* ---------------- Site & profile ---------------- */
 
-type FieldDef = { key: keyof SettingsDTO; label: string; kind?: "text" | "area" | "url" | "color" | "image" | "bool"; help?: string; wide?: boolean };
+type FieldDef = { key: keyof SettingsDTO; label: string; kind?: "text" | "area" | "url" | "color" | "image" | "bool" | "side"; help?: string; wide?: boolean };
 
 const SECTIONS: { title: string; fields: FieldDef[] }[] = [
   {
@@ -219,6 +219,7 @@ const SECTIONS: { title: string; fields: FieldDef[] }[] = [
       { key: "locationPrefix", label: "Word before location", help: '(e.g. "from")' },
       { key: "location", label: "Location" },
       { key: "portraitUrl", label: "Profile photo", kind: "image", wide: true },
+      { key: "mobilePhotoSide", label: "Small photo position on phones", kind: "side" },
       { key: "showRating", label: "Show the rating line", kind: "bool" },
       { key: "ratingScore", label: "Rating score", help: "(shown next to the stars, e.g. 4.9/5. Only use a real one)" },
       { key: "ratingText", label: "Line under the rating", wide: true },
@@ -227,6 +228,7 @@ const SECTIONS: { title: string; fields: FieldDef[] }[] = [
   {
     title: "Booking button",
     fields: [
+      { key: "showBooking", label: "Show the booking button on the site", kind: "bool" },
       { key: "bookingLabel", label: "Button text" },
       { key: "bookingUrl", label: "Button link", kind: "url", help: "(calendar link, WhatsApp link, or mailto:you@email.com)" },
     ],
@@ -293,6 +295,16 @@ function SettingsTab({ initial, notify }: { initial: SettingsDTO; notify: Notify
                   <label className="ad-check" key={f.key}>
                     <input type="checkbox" checked={Boolean(v)} onChange={(e) => set(f.key, e.target.checked as never)} />
                     {f.label}
+                  </label>
+                );
+              if (f.kind === "side")
+                return (
+                  <label className="ad-field" key={f.key}>
+                    <span>{f.label}</span>
+                    <select value={String(v)} onChange={(e) => set(f.key, e.target.value as never)}>
+                      <option value="right">Top right</option>
+                      <option value="left">Top left</option>
+                    </select>
                   </label>
                 );
               if (f.kind === "color")

@@ -47,6 +47,8 @@ export async function PUT(req: Request) {
     }
   }
   if ("showRating" in body) data.showRating = Boolean(body.showRating);
+  if ("showBooking" in body) data.showBooking = Boolean(body.showBooking);
+  if ("mobilePhotoSide" in body) data.mobilePhotoSide = body.mobilePhotoSide === "left" ? "left" : "right";
   for (const k of ["accentColor", "bgColor"] as const) {
     if (k in body) {
       if (!isHex(body[k])) return bad(`"${k}" must be a hex color like #141414`);

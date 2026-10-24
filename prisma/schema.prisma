@@ -24,6 +24,8 @@ model SiteSettings {
   ratingScore    String   @default("")
   ratingText     String   @default("")
   showRating     Boolean  @default(true)
+  showBooking    Boolean  @default(true)
+  mobilePhotoSide String  @default("right")
   workspaceLabel String   @default("Portfolio")
   footerText     String   @default("")
   seoTitle       String   @default("")

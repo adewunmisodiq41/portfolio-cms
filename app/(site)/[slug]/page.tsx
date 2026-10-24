@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { getSiteData } from "@/lib/data";
 import ProjectGrid from "@/components/ProjectGrid";
+import MiniAvatar from "@/components/MiniAvatar";
 
 export const dynamic = "force-dynamic";
 
@@ -28,17 +29,7 @@ export default async function CategoryPage({ params }: Props) {
         <Link href="/" className="back-btn">
           ← Back
         </Link>
-        <div className="mini-me" aria-hidden="true">
-          {settings.portraitUrl ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img src={settings.portraitUrl} alt="" />
-          ) : (
-            <svg viewBox="0 0 44 44">
-              <circle cx="22" cy="17" r="8" fill="#bdb9b0" />
-              <path d="M6 44c1-12 8-17 16-17s15 5 16 17z" fill="#bdb9b0" />
-            </svg>
-          )}
-        </div>
+        <MiniAvatar url={settings.portraitUrl} className="mini-me" />
       </div>
       <h2>{category.name}</h2>
       {category.intro && <p className="intro">{category.intro}</p>}

@@ -121,7 +121,7 @@ main{margin-left:18.2rem;min-width:0}
   .stats{gap:.6rem 1.6rem}
   .about{margin:2.5rem 1.2rem 0;font-size:1.3rem}
   .folders{grid-template-columns:repeat(2,minmax(0,1fr));margin-top:2.5rem}
-  .cell{aspect-ratio:1/.95}
+  .cell{aspect-ratio:1/.8}
   .folder{width:72%}
   .gallery{padding:2rem 1.2rem}
   .gallery h2{font-size:2rem}
@@ -154,5 +154,36 @@ main{margin-left:18.2rem;min-width:0}
   .sheet .desc.clamp{white-space:normal;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:3;overflow:hidden}
   .sheet .more{font-size:13px}
   .close{right:10px;top:10px;width:34px;height:34px;font-size:15px}
+}
+/* ---------- phone home page: compact header, folders in view, socials at the bottom ---------- */
+.m-top,.socials-foot{display:none}
+@media(max-width:860px){
+  .profile{background:none;margin:0;border-radius:0;overflow:visible}
+  .p-in{padding:0;gap:0;overflow:visible}
+  .portrait{display:none}
+  .profile .socials{display:none}
+  .m-top{display:flex;align-items:center;width:100%;padding:.9rem 1rem 0}
+  .m-avatar{margin-left:auto;width:48px;height:48px;border-radius:50%;overflow:hidden;background:#dcd9d2;flex:none}
+  .m-avatar img,.m-avatar svg{width:100%;height:100%;display:block;object-fit:cover}
+  .m-book{height:2.4rem;font-size:.85rem;padding:0 1.1rem}
+  .name{margin-top:1rem;font-size:clamp(26px,8vw,34px);line-height:1.1;letter-spacing:-.03em}
+  .rating{padding:.7rem 0 0;gap:.3rem}
+  .rating-row{font-size:14px}.stars{font-size:13px}
+  .rating-text{font-size:13px;max-width:none}
+  .top{padding:.9rem 1.2rem 0}
+  .top .btn{display:none}
+  .stats{width:100%;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:.5rem}
+  .stat{flex-direction:column;align-items:flex-start;gap:2px;white-space:normal}
+  .stat b{font-size:1.3rem}
+  .stat span{font-size:.72rem;color:#6f6e6a;line-height:1.25}
+  .about{margin:1.1rem 1.2rem 0;font-size:1rem;line-height:1.45}
+  .folders{margin-top:1.2rem}
+  .socials-foot{display:flex;justify-content:center;flex-wrap:wrap;gap:14px 26px;margin:1.6rem 1.2rem .4rem}
+  .socials-foot a{display:block;width:28px;height:28px;color:var(--ink)}
+  .socials-foot svg{display:block;width:100%;height:100%}
+  .socials-foot .si-fallback{font-size:12px}
+  /* photo on the left instead, when chosen in the admin */
+  .site[data-photo-side=left] .m-avatar,.site[data-photo-side=left] .mini-me{order:-1;margin:0 auto 0 0}
+  .mini-me{margin-left:auto}
 }
 @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
