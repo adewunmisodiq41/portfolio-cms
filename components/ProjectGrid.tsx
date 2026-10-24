@@ -63,6 +63,37 @@ function Media({
   );
 }
 
+/** Description clamped to 3 lines on phones, with a "See more" toggle (only shown when the text is actually cut off). */
+function Description({ text }: { text: string }) {
+  const ref = useRef<HTMLParagraphElement>(null);
+  const [expanded, setExpanded] = useState(false);
+  const [cut, setCut] = useState(false);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const measure = () => {
+      if (!expanded) setCut(el.scrollHeight > el.clientHeight + 1);
+    };
+    measure();
+    window.addEventListener("resize", measure);
+    return () => window.removeEventListener("resize", measure);
+  }, [text, expanded]);
+
+  return (
+    <>
+      <p ref={ref} className={expanded ? "desc" : "desc clamp"}>
+        {text}
+      </p>
+      {(cut || expanded) && (
+        <button type="button" className="more" onClick={() => setExpanded((v) => !v)} aria-expanded={expanded}>
+          {expanded ? "See less" : "See more"}
+        </button>
+      )}
+    </>
+  );
+}
+
 export default function ProjectGrid({
   projects,
   c1,
@@ -75,6 +106,7 @@ export default function ProjectGrid({
   const [open, setOpen] = useState<ProjectDTO | null>(null);
   const trigger = useRef<HTMLElement | null>(null);
   const closeRef = useRef<HTMLButtonElement>(null);
+  const sheetRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (!open) return;
@@ -88,6 +120,19 @@ export default function ProjectGrid({
       document.body.style.overflow = prev;
       trigger.current?.focus();
     };
+  }, [open]);
+
+  // A video that scrolls out of view inside the preview pauses, so it never plays on unseen.
+  useEffect(() => {
+    const sheet = sheetRef.current;
+    const video = sheet?.querySelector("video");
+    if (!open || !sheet || !video || typeof IntersectionObserver === "undefined") return;
+    const io = new IntersectionObserver(([entry]) => !entry.isIntersecting && video.pause(), {
+      root: sheet,
+      threshold: 0.15,
+    });
+    io.observe(video);
+    return () => io.disconnect();
   }, [open]);
 
   if (projects.length === 0) return <p className="empty">No projects in this folder yet.</p>;
@@ -128,14 +173,14 @@ export default function ProjectGrid({
             <button ref={closeRef} className="close" onClick={() => setOpen(null)} aria-label="Close preview">
               ✕
             </button>
-            <div className="sheet">
+            <div className="sheet" ref={sheetRef}>
               <div className="img">
                 <Media project={open} c1={c1} c2={c2} full />
               </div>
               <div className="row">
                 <div>
                   <h2>{open.title}</h2>
-                  {open.description && <p>{open.description}</p>}
+                  {open.description && <Description key={open.id} text={open.description} />}
                 </div>
                 {open.linkUrl && (
                   <a

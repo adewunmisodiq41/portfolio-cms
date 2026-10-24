@@ -100,7 +100,10 @@ main{margin-left:18.2rem;min-width:0}
 .sheet .img svg{width:100%;aspect-ratio:16/10;display:block}
 .sheet .row{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;padding:20px 8px 8px;flex-wrap:wrap}
 .sheet h2{font-size:26px;letter-spacing:-.02em;font-weight:600}
-.sheet p{color:#6f6e6a;margin-top:6px;line-height:1.5;max-width:520px;white-space:pre-line}
+.sheet .desc{color:#6f6e6a;margin-top:6px;line-height:1.5;max-width:520px;white-space:pre-line}
+.sheet .more{margin-top:6px;font-size:.9rem;font-weight:600;color:var(--ink);text-decoration:underline;text-underline-offset:3px;padding:2px 0}
+.gallery-top{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.mini-me{display:none}
 .close{position:absolute;right:14px;top:14px;z-index:2;width:40px;height:40px;border-radius:50%;background:#fff;box-shadow:0 1px 2px rgba(0,0,0,.08),0 8px 24px rgba(0,0,0,.12);font-size:18px}
 
 .foot{margin:1rem 3rem 1.5rem 3.5rem;font-size:.8rem;color:#9a9a9e}
@@ -127,5 +130,29 @@ main{margin-left:18.2rem;min-width:0}
 }
 @media(max-width:520px){
   .grid{grid-template-columns:1fr}
+}
+
+/* ---------- phone: folder page header + project preview ---------- */
+@media(max-width:860px){
+  /* inside a folder: no big profile card or stats, just the back button and a small photo at the top right */
+  .site:has(.gallery) .profile,.site:has(.gallery) .top{display:none}
+  .gallery{padding-top:1rem}
+  .mini-me{display:block;width:44px;height:44px;border-radius:50%;overflow:hidden;background:#dcd9d2;flex:none}
+  .mini-me img,.mini-me svg{width:100%;height:100%;display:block;object-fit:cover}
+  .gallery h2{margin-top:1.2rem}
+}
+@media(max-width:600px){
+  /* preview window: video first, thin frame, small title, 3-line description */
+  .modal{padding:6px;align-items:center}
+  .sheetwrap{max-width:none}
+  .sheet{border-radius:18px;padding:6px;max-height:94vh;overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
+  .sheet .img{border-radius:13px}
+  .sheet .img video,.sheet .img img{max-height:none}
+  .sheet .row{padding:12px 8px 6px;gap:10px}
+  .sheet h2{font-size:18px;line-height:1.25;letter-spacing:-.01em}
+  .sheet .desc{font-size:14px;margin-top:4px}
+  .sheet .desc.clamp{white-space:normal;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:3;overflow:hidden}
+  .sheet .more{font-size:13px}
+  .close{right:10px;top:10px;width:34px;height:34px;font-size:15px}
 }
 @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
