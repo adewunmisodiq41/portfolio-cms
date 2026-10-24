@@ -4,7 +4,7 @@ import { randomUUID } from "node:crypto";
 
 export const UPLOAD_DIR = path.resolve(process.env.UPLOAD_DIR || "./uploads");
 
-const EXT: Record<string, string> = {
+const IMAGE_EXT: Record<string, string> = {
   "image/jpeg": "jpg",
   "image/png": "png",
   "image/webp": "webp",
@@ -12,19 +12,41 @@ const EXT: Record<string, string> = {
   "image/avif": "avif",
 };
 
-export const ALLOWED_TYPES = Object.keys(EXT);
-export const MAX_BYTES = 4 * 1024 * 1024; // Vercel limits request bodies to ~4.5MB
+const VIDEO_EXT: Record<string, string> = {
+  "video/mp4": "mp4",
+  "video/webm": "webm",
+  "video/quicktime": "mov",
+};
+
+export const ALLOWED_TYPES = Object.keys(IMAGE_EXT);
+export const ALLOWED_VIDEO_TYPES = Object.keys(VIDEO_EXT);
+export const MAX_BYTES = 4 * 1024 * 1024; // images go through the server; Vercel limits request bodies to ~4.5MB
+export const MAX_VIDEO_BYTES = 100 * 1024 * 1024; // videos go straight from the browser to storage
 
 /** The Blob token is BLOB_READ_WRITE_TOKEN, or PREFIX_READ_WRITE_TOKEN if the store was connected with a custom prefix. */
-function blobToken(): string | undefined {
+export function blobToken(): string | undefined {
   if (process.env.BLOB_READ_WRITE_TOKEN) return process.env.BLOB_READ_WRITE_TOKEN;
   const key = Object.keys(process.env).find((k) => k.endsWith("_READ_WRITE_TOKEN") && process.env[k]);
   return key ? process.env[key] : undefined;
 }
 
-/** Stores an image and returns its public URL. Uses Vercel Blob when a token is set, otherwise local disk. */
-export async function saveImage(file: File): Promise<string> {
-  const ext = EXT[file.type];
+/**
+ * How uploads are stored:
+ *  - "token":     Vercel Blob with a read/write token (older stores)
+ *  - "presigned": Vercel Blob connected through BLOB_STORE_ID (newer stores, no read/write token)
+ *  - "local":     files on this server's disk (local development or a VPS with a persistent volume)
+ */
+export type UploadMode = "token" | "presigned" | "local";
+
+export function uploadMode(): UploadMode {
+  if (blobToken()) return "token";
+  if (process.env.BLOB_STORE_ID) return "presigned";
+  return "local";
+}
+
+/** Stores an image or video and returns its public URL. Uses Vercel Blob when configured, otherwise local disk. */
+export async function saveMedia(file: File): Promise<string> {
+  const ext = IMAGE_EXT[file.type] ?? VIDEO_EXT[file.type];
   const name = `${Date.now()}-${randomUUID().slice(0, 8)}.${ext}`;
 
   // Newer Blob stores connect with BLOB_STORE_ID and sign in automatically (no read/write token).

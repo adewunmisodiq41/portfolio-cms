@@ -36,3 +36,8 @@ export function isHex(v: unknown): v is string {
 export function str(v: unknown, max = 2000): string {
   return String(v ?? "").trim().slice(0, max);
 }
+
+/** True when a media URL points at a video file (by extension, ignoring any ?query or #hash). */
+export function isVideoUrl(url: string): boolean {
+  return /\.(mp4|webm|mov|m4v)$/i.test(String(url ?? "").split(/[?#]/)[0]);
+}

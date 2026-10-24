@@ -2,9 +2,45 @@
 
 import { useEffect, useId, useRef, useState } from "react";
 import type { ProjectDTO } from "@/lib/types";
+import { isVideoUrl } from "@/lib/utils";
 
-function Media({ project, c1, c2, tall }: { project: ProjectDTO; c1: string; c2: string; tall?: boolean }) {
+function Media({
+  project,
+  c1,
+  c2,
+  tall,
+  full,
+}: {
+  project: ProjectDTO;
+  c1: string;
+  c2: string;
+  tall?: boolean;
+  /** true in the preview window: videos get controls and play */
+  full?: boolean;
+}) {
   const gid = "g" + useId().replace(/[^a-zA-Z0-9]/g, "");
+  if (project.imageUrl && isVideoUrl(project.imageUrl)) {
+    if (full) {
+      return (
+        <video
+          key={project.imageUrl}
+          src={project.imageUrl}
+          controls
+          autoPlay
+          playsInline
+          preload="auto"
+          aria-label={project.title}
+        />
+      );
+    }
+    // In the gallery: show the video's first frame with a play badge; it plays in the preview window.
+    return (
+      <>
+        <video src={`${project.imageUrl}#t=0.1`} muted playsInline preload="metadata" tabIndex={-1} aria-hidden="true" />
+        <span className="play" aria-hidden="true" />
+      </>
+    );
+  }
   if (project.imageUrl) {
     // eslint-disable-next-line @next/next/no-img-element
     return <img src={project.imageUrl} alt={project.title} loading="lazy" />;
@@ -94,7 +130,7 @@ export default function ProjectGrid({
             </button>
             <div className="sheet">
               <div className="img">
-                <Media project={open} c1={c1} c2={c2} />
+                <Media project={open} c1={c1} c2={c2} full />
               </div>
               <div className="row">
                 <div>

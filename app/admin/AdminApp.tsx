@@ -3,6 +3,7 @@
 import { useRef, useState } from "react";
 import { signOut } from "next-auth/react";
 import type { CategoryDTO, ProjectDTO, SettingsDTO } from "@/lib/types";
+import { isVideoUrl } from "@/lib/utils";
 
 type Pair = Record<string, string>;
 type Notify = (text: string, ok?: boolean) => void;
@@ -43,38 +44,110 @@ async function prepareImage(file: File): Promise<File> {
   }
 }
 
-function ImageField({
+const VIDEO_MIME: Record<string, string> = { mp4: "video/mp4", webm: "video/webm", mov: "video/quicktime" };
+const mb = (bytes: number) => Math.round((bytes / 1024 / 1024) * 10) / 10;
+
+/** The video's content type, from the file itself or (when the browser leaves it blank) its extension. */
+function videoMime(file: File): string | null {
+  if (Object.values(VIDEO_MIME).includes(file.type)) return file.type;
+  const ext = file.name.toLowerCase().match(/\.(mp4|webm|mov)$/)?.[1];
+  return ext ? VIDEO_MIME[ext] : null;
+}
+
+/** Local-disk uploads: a normal form upload, with progress. */
+function xhrUpload(file: File, onProgress: (pct: number) => void): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const form = new FormData();
+    form.append("file", file);
+    const xhr = new XMLHttpRequest();
+    xhr.open("POST", "/api/admin/upload");
+    xhr.upload.onprogress = (e) => e.lengthComputable && onProgress(Math.round((e.loaded / e.total) * 100));
+    xhr.onload = () => {
+      try {
+        const json = JSON.parse(xhr.responseText);
+        if (xhr.status >= 200 && xhr.status < 300) resolve(json.url);
+        else reject(new Error(json.error || "Upload failed"));
+      } catch {
+        reject(new Error("Upload failed"));
+      }
+    };
+    xhr.onerror = () => reject(new Error("Upload failed. Check your internet connection."));
+    xhr.send(form);
+  });
+}
+
+/** Sends a video from the browser straight to storage (it is too big to pass through the server). */
+async function uploadVideo(file: File, mime: string, onProgress: (pct: number) => void): Promise<string> {
+  const info = await api<{ mode: "token" | "presigned" | "local"; maxVideoBytes: number }>("/api/admin/upload", "GET");
+  if (file.size > info.maxVideoBytes) {
+    throw new Error(
+      `This video is ${mb(file.size)} MB and the limit is ${mb(info.maxVideoBytes)} MB. Export it smaller (1080p MP4) and try again.`,
+    );
+  }
+  if (info.mode === "local") return xhrUpload(file, onProgress);
+
+  const ext = Object.keys(VIDEO_MIME).find((k) => VIDEO_MIME[k] === mime)!;
+  const pathname = `portfolio/videos/${Date.now().toString(36)}-${crypto.randomUUID().slice(0, 8)}.${ext}`;
+  const blob = await import("@vercel/blob/client");
+  const options = {
+    access: "public" as const,
+    handleUploadUrl: "/api/admin/upload/client",
+    contentType: mime,
+    onUploadProgress: (e: { percentage: number }) => onProgress(Math.round(e.percentage)),
+  };
+  const result =
+    info.mode === "presigned"
+      ? await blob.uploadPresigned(pathname, file, options)
+      : await blob.upload(pathname, file, options);
+  return result.url;
+}
+
+function MediaField({
   label,
   value,
   onChange,
   notify,
   help,
+  allowVideo = false,
 }: {
   label: string;
   value: string;
   onChange: (v: string) => void;
   notify: Notify;
   help?: string;
+  allowVideo?: boolean;
 }) {
   const input = useRef<HTMLInputElement>(null);
   const [busy, setBusy] = useState(false);
+  const [pct, setPct] = useState(0);
 
   async function pick(file?: File) {
     if (!file) return;
     setBusy(true);
+    setPct(0);
     try {
-      const ready = await prepareImage(file);
-      const form = new FormData();
-      form.append("file", ready);
-      const res = await fetch("/api/admin/upload", { method: "POST", body: form });
-      const json = await res.json().catch(() => ({}));
-      if (!res.ok) throw new Error(json.error || "Upload failed");
-      onChange(json.url);
-      notify("Image uploaded. Remember to save.");
+      const looksLikeVideo = file.type.startsWith("video/") || /\.(mp4|webm|mov|m4v|mkv|avi)$/i.test(file.name);
+      if (looksLikeVideo) {
+        if (!allowVideo) throw new Error("This field takes an image. You can add videos to a project.");
+        const mime = videoMime(file);
+        if (!mime) throw new Error("Please use an MP4, WebM or MOV video.");
+        onChange(await uploadVideo(file, mime, setPct));
+        notify("Video uploaded. Remember to save.");
+      } else {
+        const ready = await prepareImage(file);
+        const form = new FormData();
+        form.append("file", ready);
+        const res = await fetch("/api/admin/upload", { method: "POST", body: form });
+        const json = await res.json().catch(() => ({}));
+        if (!res.ok) throw new Error(json.error || "Upload failed");
+        onChange(json.url);
+        notify("Image uploaded. Remember to save.");
+      }
     } catch (e) {
       notify(e instanceof Error ? e.message : "Upload failed", false);
     } finally {
       setBusy(false);
+      setPct(0);
       if (input.current) input.current.value = "";
     }
   }
@@ -85,20 +158,47 @@ function ImageField({
         {label} {help && <small>{help}</small>}
       </span>
       <div className="ad-img">
-        <div className="prev" style={value ? { backgroundImage: `url("${value}")` } : undefined} />
+        {isVideoUrl(value) ? (
+          <video className="prev" src={`${value}#t=0.1`} muted playsInline preload="metadata" aria-label="Video preview" />
+        ) : (
+          <div className="prev" style={value ? { backgroundImage: `url("${value}")` } : undefined} />
+        )}
         <div className="ctl">
-          <input type="text" value={value} placeholder="Paste an image URL, or upload" onChange={(e) => onChange(e.target.value)} />
+          <input
+            type="text"
+            value={value}
+            placeholder={allowVideo ? "Paste an image or video URL, or upload" : "Paste an image URL, or upload"}
+            onChange={(e) => onChange(e.target.value)}
+          />
           <div className="ad-row">
             <button type="button" className="ad-btn" disabled={busy} onClick={() => input.current?.click()}>
-              {busy ? "Uploading…" : "Upload image"}
+              {busy ? (pct > 0 ? `Uploading… ${pct}%` : "Uploading…") : allowVideo ? "Upload image or video" : "Upload image"}
             </button>
-            {value && (
+            {value && !busy && (
               <button type="button" className="ad-btn" onClick={() => onChange("")}>
                 Remove
               </button>
             )}
-            <input ref={input} type="file" accept="image/jpeg,image/png,image/webp,image/gif,image/avif" hidden onChange={(e) => pick(e.target.files?.[0])} />
+            <input
+              ref={input}
+              type="file"
+              accept={
+                allowVideo
+                  ? "image/jpeg,image/png,image/webp,image/gif,image/avif,video/mp4,video/webm,video/quicktime,.mp4,.webm,.mov"
+                  : "image/jpeg,image/png,image/webp,image/gif,image/avif"
+              }
+              hidden
+              onChange={(e) => pick(e.target.files?.[0])}
+            />
           </div>
+          {busy && pct > 0 && (
+            <div className="ad-bar" role="progressbar" aria-valuenow={pct} aria-valuemin={0} aria-valuemax={100}>
+              <i style={{ width: `${pct}%` }} />
+            </div>
+          )}
+          {allowVideo && !busy && (
+            <small className="ad-muted">Videos: MP4, WebM or MOV, up to 100 MB. MP4 (H.264) plays everywhere.</small>
+          )}
         </div>
       </div>
     </div>
@@ -185,7 +285,7 @@ function SettingsTab({ initial, notify }: { initial: SettingsDTO; notify: Notify
               if (f.kind === "image")
                 return (
                   <div className={cls} key={f.key}>
-                    <ImageField label={f.label} value={String(v)} onChange={(x) => set(f.key, x as never)} notify={notify} help={f.help} />
+                    <MediaField label={f.label} value={String(v)} onChange={(x) => set(f.key, x as never)} notify={notify} help={f.help} />
                   </div>
                 );
               if (f.kind === "bool")
@@ -590,7 +690,7 @@ function ProjectCard({
           <input type="text" value={d.meta} onChange={(e) => setD({ ...d, meta: e.target.value })} />
         </label>
         <div className="wide">
-          <ImageField label="Project image" value={d.imageUrl} onChange={(v) => setD({ ...d, imageUrl: v })} notify={notify} />
+          <MediaField label="Project image or video" value={d.imageUrl} onChange={(v) => setD({ ...d, imageUrl: v })} notify={notify} allowVideo />
         </div>
         <label className="ad-field wide">
           <span>Description</span>

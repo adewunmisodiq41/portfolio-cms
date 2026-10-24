@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { getSiteData } from "@/lib/data";
 import FolderIcon from "@/components/FolderIcon";
+import { isVideoUrl } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
 
@@ -31,7 +32,7 @@ export default async function Home() {
                 color1={c.color1}
                 color2={c.color2}
                 images={c.projects
-                  .filter((p) => p.imageUrl)
+                  .filter((p) => p.imageUrl && !isVideoUrl(p.imageUrl))
                   .slice(0, 3)
                   .map((p) => p.imageUrl)}
               />
